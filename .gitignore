@@ -1,0 +1,6 @@
+.DS_Store
+_output
+_out
+*.iml
+*.ipr
+*.iws

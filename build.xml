@@ -1,0 +1,143 @@
+<project name="JarIndexer" default="build-jar" basedir=".">
+
+  <!-- ============================================================== -->
+  <!-- Load our build properties                                      -->
+  <!-- ============================================================== -->
+  <property file="build.properties"/>
+
+  <!-- ============================================================== -->
+  <!-- Set up the build-time classpath                                -->
+  <!-- ============================================================== -->
+  <path id="build.classpath">
+    <fileset dir="lib">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${jarbundler.dir}">
+        <include name="jarbundler-1.9.jar"/>
+    </fileset>
+    <fileset dir="${launch4j.dir}">
+        <include name="launch4j.jar"/>
+    </fileset>
+  </path>
+
+  <!-- ============================================================== -->
+  <!-- Task for JarBundler                                            -->
+  <!-- ============================================================== -->
+  <taskdef name="jarbundler"
+           classname="net.sourceforge.jarbundler.JarBundler"
+           classpathref="build.classpath"/>
+
+  <!-- ============================================================== -->
+  <!-- Task for Launch4J                                              -->
+  <!-- ============================================================== -->
+  <taskdef name="launch4j"
+           classname="net.sf.launch4j.ant.Launch4jTask"
+           classpathref="build.classpath"/>
+    
+  <!-- ============================================================== -->
+  <!-- Rebuild it all                                                 -->
+  <!-- ============================================================== -->
+  <target name="rebuild" depends="clean, build-jar, build-osx-bundle, build-windows-executable, build-zip"/>
+
+    
+  <!-- ============================================================== -->
+  <!-- Compile the code and build the final jar file                  -->
+  <!-- ============================================================== -->
+  <target name="build-jar">
+    <delete dir="${output.dir}"/>
+    <mkdir dir="${output.dir}"/>
+    <mkdir dir="${classes.dir}"/>
+    <mkdir dir="${final.dir}"/>
+    <mkdir dir="${output.dir.osx}"/>
+    <mkdir dir="${output.dir.windows}"/>
+    <javac srcdir="${source.dir}"
+           destdir="${classes.dir}"
+           includes="**/*.*"
+           source="1.4"
+           target="1.4"/>
+
+    <unjar src="lib/hsqldb.jar" dest="${classes.dir}"/>
+    <copy file="${conf.dir}/jar_indexer.sql" todir="${classes.dir}/resources"/>
+    <copy file="${resources.dir}/licenses/hsqldb/hypersonic_lic.txt" todir="${classes.dir}"/>
+
+    <jar jarfile="${output.dir}/${jar.filename}"
+         basedir="${classes.dir}"
+         manifest="${conf.dir}/MANIFEST.MF"
+         compress="true" />
+
+    <copy todir="${final.dir}" file="${output.dir}/${jar.filename}"/>
+
+    <gzip src="${output.dir}/${jar.filename}" destfile="${final.dir}/${gz.filename}"/>
+  </target>
+
+  <!-- ============================================================== -->
+  <!-- Build the OSX application for distribution                     -->
+  <!-- ============================================================== -->
+  <target name="build-osx-bundle">
+    <jarbundler dir="${output.dir.osx}"
+                name="${app.name}"
+                mainclass="net.humandoing.jarindexer.Main"
+                jvmversion="1.4+"
+                jar="${output.jar}"
+                icon="resources/icon_final/${app.name}.icns"
+                version="${app.number.version} ${app.text.version}"/>
+
+    <!-- Create a .dmg file containing the app and docs -->
+    <exec executable="/usr/bin/hdiutil" os="Mac OS X">
+      <arg value="create"/>
+      <arg value="-fs"/>
+      <arg value="HFS+"/>
+      <arg value="-volname"/>
+      <arg value="${app.name}"/>
+      <arg value="-srcfolder"/>
+      <arg value="${output.dir.osx}"/>
+      <arg value="${output.dmg}"/>
+    </exec>
+  </target>
+
+  <!-- ============================================================== -->
+  <!-- Build the Windows executable for distribution                  -->
+  <!-- ============================================================== -->
+  <target name="build-windows-executable">
+    <copy file="conf/launch4j_config.xml" todir="${output.dir}"/>
+
+    <replace file="${output.dir}/launch4j_config.xml">
+        <replacefilter token="@@app.name@@" value="${app.name}"/>
+        <replacefilter token="@@exe.filename@@" value="${exe.filename}"/>
+        <replacefilter token="@@jar.filename@@" value="${jar.filename}"/>
+        <replacefilter token="@@company.name@@" value="${company.name}"/>
+        <replacefilter token="@@app.desc@@" value="${app.desc}"/>
+        <replacefilter token="@@jar.filename@@" value="${jar.filename}"/>
+        <replacefilter token="@@app.number.version@@" value="${app.number.version}"/>
+        <replacefilter token="@@app.text.version@@" value="${app.text.version}"/>
+    </replace>
+
+    <launch4j configFile="${output.dir}/launch4j_config.xml" />
+
+    <zip file="${final.dir}/${zip.filename}">
+        <fileset file="${output.dir.windows}/${exe.filename}"/>
+    </zip>
+  </target>
+
+  <!-- ============================================================== -->
+  <!-- Build the zip containing all three distributions               -->
+  <!-- ============================================================== -->
+  <target name="build-zip">
+      <zip destfile="${final.dir}/${alldist.filename}">
+        <fileset dir="${final.dir}">
+            <include name="${jar.filename}"/>
+            <include name="${zip.filename}"/>
+            <include name="${dmg.filename}"/>
+        </fileset>
+      </zip>
+  </target>
+
+  <!-- ============================================================== -->
+  <!-- Clean it all up                                                -->
+  <!-- ============================================================== -->
+  <target name="clean">
+    <delete dir="${output.dir}"/>
+  </target>
+
+
+</project>

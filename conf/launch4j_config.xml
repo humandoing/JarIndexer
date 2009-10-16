@@ -1,0 +1,28 @@
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>@@jar.filename@@</jar>
+  <outfile>windows/@@exe.filename@@</outfile>
+  <errTitle></errTitle>
+  <jarArgs></jarArgs>
+  <chdir></chdir>
+  <customProcName>false</customProcName>
+  <stayAlive>false</stayAlive>
+  <icon>../resources/icon_final/@@app.name@@.ico</icon>
+  <jre>
+    <minVersion>1.4.0</minVersion>
+    <jdkPreference>preferJre</jdkPreference>
+  </jre>
+  <versionInfo>
+    <fileVersion>@@app.number.version@@</fileVersion>
+    <txtFileVersion>@@app.text.version@@</txtFileVersion>
+    <fileDescription>@@app.desc@@</fileDescription>
+    <copyright>@@company.name@@</copyright>
+    <productVersion>@@app.number.version@@</productVersion>
+    <txtProductVersion>@@app.text.version@@</txtProductVersion>
+    <productName>@@app.name@@</productName>
+    <companyName>@@company.name@@</companyName>
+    <internalName>@@app.name@@</internalName>
+    <originalFilename>@@exe.filename@@</originalFilename>
+  </versionInfo>
+</launch4jConfig>
