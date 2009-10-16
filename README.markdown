@@ -30,7 +30,7 @@ You sure can. The ANT build file has a bunch of great tasks, one of which "rebui
 
 [3]: http://launch4j.sourceforge.net/
 
-[JarBundler] [4] - - Creates native Mac OS X executable. 
+[JarBundler] [4] - Creates native Mac OS X executable. 
 
 [4]: http://informagen.com/JarBundler/
 
